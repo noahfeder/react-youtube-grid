@@ -1,0 +1,32 @@
+{
+  "name": "react-youtube-grid",
+  "version": "0.0.1",
+  "description": "A responsive grid view for on-demand YouTube embeds.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "babel ./src/YouTubeGrid.js -o index.js",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "youtube",
+    "responsive"
+  ],
+  "author": "Noah Feder",
+  "license": "CC0-1.0",
+  "dependencies": {
+    "react": "^15.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-airbnb": "^2.1.1",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "enzyme": "^2.5.1",
+    "jest": "^16.0.2",
+    "react-addons-test-utils": "^15.3.2",
+    "react-dom": "^15.3.2"
+  }
+}
