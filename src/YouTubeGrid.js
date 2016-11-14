@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-
-// import style from './style.js';
-import YouTube from './YouTube.js';
+import youTubePlayer from 'youtube-player';
 
 const style = {
   videoGrid: {
@@ -19,8 +17,8 @@ const style = {
     position: 'relative',
     padding: '0px 5px 10px 5px',
     height: 'auto',
-    flexGrow: '1',
-    flexShrink: '100%',
+    flex: '1',
+    flexBasis: '33%',
     boxSizing: 'border-box',
     margin: 'auto',
   },
@@ -55,7 +53,7 @@ const style = {
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
     backgroundPosition: 'center center',
-    webkitTransition: 'background 200ms',
+    WebkitTransition: 'background 200ms',
     transition: 'background 200ms',
   },
   playButtonHover: {
@@ -63,34 +61,107 @@ const style = {
   },
 }
 
-export default class YouTubeGrid extends Component {
-  // static get propTypes() {
-  //   return {
-  //     youtubeUrls: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-  //   }
-  // }
+class YouTube extends React.Component {
+  static get propTypes() {
+    return {
+      videoId: React.PropTypes.string,
 
+      // custom ID for player element
+      id: React.PropTypes.string,
+
+      // custom class name for player element
+      className: React.PropTypes.string,
+    };
+  }
   static get defaultProps() {
     return {
-      youtubeUrls: [],
+      opts: {},
+    };
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.container = null;
+    this.internalPlayer = null;
+  }
+
+  componentDidMount() {
+    this.createPlayer();
+  }
+
+  componentWillUnmount() {
+     /**
+      * Note: The `youtube-player` package that is used promisifies all Youtube
+      * Player API calls, which introduces a delay of a tick before it actually
+      * gets destroyed. Since React attempts to remove the element instantly
+      * this method isn't quick enough to reset the container element.
+      */
+    this.internalPlayer.destroy();
+  }
+  /**
+   * Initialize the Youtube Player API on the container and attach event handlers
+   */
+  createPlayer() {
+    // do not attempt to create a player server-side, it won't work
+    if (typeof document === 'undefined') return;
+    // create player
+    const playerOpts = {
+      ...this.props.opts,
+      // preload the `videoId` video if one is already given
+      videoId: this.props.videoId,
+    };
+    this.internalPlayer = youTubePlayer(this.container, playerOpts);
+    // attach event handlers
+    this.internalPlayer.on('ready', this.onPlayerReady);
+    this.internalPlayer.on('error', this.onPlayerError);
+    this.internalPlayer.on('stateChange', this.onPlayerStateChange);
+    this.internalPlayer.on('playbackRateChange', this.onPlayerPlaybackRateChange);
+    this.internalPlayer.on('playbackQualityChange', this.onPlayerPlaybackQualityChange);
+  };
+
+  refContainer(container) {
+    this.container = container;
+  };
+
+  render() {
+    return (
+      <span style={ style.gridItemOuter } >
+        <div style={ style.gridItemInner} id={this.props.id} className={this.props.className} ref={this.refContainer.bind(this)} />
+      </span>
+    );
+  }
+}
+
+
+
+export default class YouTubeGrid extends Component {
+  static get propTypes() {
+    return {
+      youtubeUrls: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
     }
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      active: 0
+      active: -1
     }
   }
 
+  componentWillMount() {
+    console.log(this.props)
+    console.log(this.state)
+  }
+
   expand(num) {
+    console.log('clicky')
     this.setState({
       active: num
     });
   }
 
   videos() {
-
     return this.props.youtubeUrls.map( (videoId, index) => {
       let active = (this.state.active === index) ;
       let videoOrPlaceholder = active ?
@@ -99,8 +170,9 @@ export default class YouTubeGrid extends Component {
           videoId={ videoId }
           opts={ { playerVars: {autoplay: 1} } }
         /> :
-        <span>
+        <span style={ style.gridItemOuter }>
           <img
+            style={ style.gridItemInner }
             className="placeholder"
             src={ `http://img.youtube.com/vi/${videoId}/mqdefault.jpg` }
             alt="placeholder"
