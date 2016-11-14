@@ -1,6 +1,6 @@
 {
   "name": "react-youtube-grid",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A responsive grid view for on-demand YouTube embeds.",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,6 @@
   "license": "CC0-1.0",
   "dependencies": {
     "react": "^15.3.2",
-    "react-youtube": "^7.2.0",
     "youtube-player": "^4.0.1"
   },
   "devDependencies": {
