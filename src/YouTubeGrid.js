@@ -49,7 +49,7 @@ const style = {
     left: 'calc(50% - 30px)',
     top: 'calc(50% - 21px)',
     cursor: 'pointer',
-    backgroundImage: `url('./img/playdark.png')`,
+    backgroundImage: `url('../public/playdark.png')`,
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
     backgroundPosition: 'center center',
@@ -57,8 +57,17 @@ const style = {
     transition: 'background 200ms',
   },
   playButtonHover: {
-    backgroundImage: `url('./img/playred.png')`,
+    backgroundImage: `url('../public/playred.png')`,
   },
+  column3: {
+    flexBasis: '33.3%',
+  },
+  column2: {
+    flexBasis: '50%',
+  },
+  column1: {
+    flexBasis: '100%',
+  }
 }
 
 class YouTube extends React.Component {
@@ -139,23 +148,50 @@ export default class YouTubeGrid extends Component {
   static get propTypes() {
     return {
       youtubeUrls: React.PropTypes.arrayOf(React.PropTypes.string).isRequired,
-    }
+      mobile: React.PropTypes.number,
+      tablet: React.PropTypes.number,
+    };
+  }
+
+  static get defaultProps() {
+    return {
+      mobile: 601,
+      tablet: 992,
+    };
   }
 
   constructor(props) {
     super(props);
     this.state = {
-      active: -1
+      active: -1,
+      columns: this.windowSize(),
+    };
+  }
+
+  windowSize() {
+    let w = window.innerWidth;
+    if (w < this.props.mobile) {
+      return 1;
+    }
+    if (w < this.props.tablet) {
+      return 2;
+    }
+    return 3;
+  }
+
+  componentDidMount() {
+    window.onresize = () => {
+      this.setState({
+        columns: this.windowSize(),
+      });
     }
   }
 
-  componentWillMount() {
-    console.log(this.props)
-    console.log(this.state)
+  componentWillUnmount() {
+    window.onresize = () => null;
   }
 
   expand(num) {
-    console.log('clicky')
     this.setState({
       active: num
     });
@@ -188,7 +224,7 @@ export default class YouTubeGrid extends Component {
         onMouseLeave={ () => this.style = style.playButton }
       />;
       return (
-        <div key={ videoId } style={ style.gridItem } >
+        <div key={ videoId } style={ { ...style.gridItem, ...style[`column${this.state.columns}`] } } >
           { videoOrPlaceholder }
           { button }
         </div>

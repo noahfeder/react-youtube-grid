@@ -70,7 +70,7 @@ var style = {
     left: 'calc(50% - 30px)',
     top: 'calc(50% - 21px)',
     cursor: 'pointer',
-    backgroundImage: 'url(\'./img/playdark.png\')',
+    backgroundImage: 'url(\'../public/playdark.png\')',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'contain',
     backgroundPosition: 'center center',
@@ -78,7 +78,16 @@ var style = {
     transition: 'background 200ms'
   },
   playButtonHover: {
-    backgroundImage: 'url(\'./img/playred.png\')'
+    backgroundImage: 'url(\'../public/playred.png\')'
+  },
+  column3: {
+    flexBasis: '33.3%'
+  },
+  column2: {
+    flexBasis: '50%'
+  },
+  column1: {
+    flexBasis: '100%'
   }
 };
 
@@ -210,7 +219,21 @@ var YouTubeGrid = function (_Component) {
     get: function () {
       function get() {
         return {
-          youtubeUrls: _react2['default'].PropTypes.arrayOf(_react2['default'].PropTypes.string).isRequired
+          youtubeUrls: _react2['default'].PropTypes.arrayOf(_react2['default'].PropTypes.string).isRequired,
+          mobile: _react2['default'].PropTypes.number,
+          tablet: _react2['default'].PropTypes.number
+        };
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'defaultProps',
+    get: function () {
+      function get() {
+        return {
+          mobile: 601,
+          tablet: 992
         };
       }
 
@@ -224,26 +247,58 @@ var YouTubeGrid = function (_Component) {
     var _this2 = _possibleConstructorReturn(this, (YouTubeGrid.__proto__ || Object.getPrototypeOf(YouTubeGrid)).call(this, props));
 
     _this2.state = {
-      active: -1
+      active: -1,
+      columns: _this2.windowSize()
     };
     return _this2;
   }
 
   _createClass(YouTubeGrid, [{
-    key: 'componentWillMount',
+    key: 'windowSize',
     value: function () {
-      function componentWillMount() {
-        console.log(this.props);
-        console.log(this.state);
+      function windowSize() {
+        var w = window.innerWidth;
+        if (w < this.props.mobile) {
+          return 1;
+        }
+        if (w < this.props.tablet) {
+          return 2;
+        }
+        return 3;
       }
 
-      return componentWillMount;
+      return windowSize;
+    }()
+  }, {
+    key: 'componentDidMount',
+    value: function () {
+      function componentDidMount() {
+        var _this3 = this;
+
+        window.onresize = function () {
+          _this3.setState({
+            columns: _this3.windowSize()
+          });
+        };
+      }
+
+      return componentDidMount;
+    }()
+  }, {
+    key: 'componentWillUnmount',
+    value: function () {
+      function componentWillUnmount() {
+        window.onresize = function () {
+          return null;
+        };
+      }
+
+      return componentWillUnmount;
     }()
   }, {
     key: 'expand',
     value: function () {
       function expand(num) {
-        console.log('clicky');
         this.setState({
           active: num
         });
@@ -255,10 +310,10 @@ var YouTubeGrid = function (_Component) {
     key: 'videos',
     value: function () {
       function videos() {
-        var _this3 = this;
+        var _this4 = this;
 
         return this.props.youtubeUrls.map(function (videoId, index) {
-          var active = _this3.state.active === index;
+          var active = _this4.state.active === index;
           var videoOrPlaceholder = active ? _react2['default'].createElement(YouTube, {
             id: videoId,
             videoId: videoId,
@@ -273,7 +328,7 @@ var YouTubeGrid = function (_Component) {
               alt: 'placeholder',
               onClick: function () {
                 function onClick() {
-                  return _this3.expand(index);
+                  return _this4.expand(index);
                 }
 
                 return onClick;
@@ -285,21 +340,21 @@ var YouTubeGrid = function (_Component) {
             style: style.playButton,
             onClick: function () {
               function onClick() {
-                return _this3.expand(index);
+                return _this4.expand(index);
               }
 
               return onClick;
             }(),
             onMouseEnter: function () {
               function onMouseEnter() {
-                return _this3.style = style.playButtonHover;
+                return _this4.style = style.playButtonHover;
               }
 
               return onMouseEnter;
             }(),
             onMouseLeave: function () {
               function onMouseLeave() {
-                return _this3.style = style.playButton;
+                return _this4.style = style.playButton;
               }
 
               return onMouseLeave;
@@ -307,7 +362,7 @@ var YouTubeGrid = function (_Component) {
           });
           return _react2['default'].createElement(
             'div',
-            { key: videoId, style: style.gridItem },
+            { key: videoId, style: Object.assign({}, style.gridItem, style['column' + String(_this4.state.columns)]) },
             videoOrPlaceholder,
             button
           );
